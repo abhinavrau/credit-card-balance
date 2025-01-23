@@ -1,0 +1,115 @@
+openapi: 3.0.0
+info:
+  title: Credit Card Service
+  description: This API provides information about credit card balance, recent transactions, and account status given the last 4 digits of the account number.
+  version: v1
+servers:
+  - url: https://us-east1-argolis-arau.cloudfunctions.net/credit-card-service
+paths:
+  /balance/{accountNumber}:
+    get:
+      summary: Get credit card balance
+      description: Retrieves the balance and other details for a given the last 4 digits of the account number.
+      operationId: getBalance
+      parameters:
+        - in: path
+          name: accountNumber
+          schema:
+            type: string
+          required: true
+          description: Credit card account number
+      responses:
+        '200':
+          description: Credit card details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCard'
+        '404':
+          description: Account not found
+  /transactions/{accountNumber}:
+    get:
+      summary: Get recent transactions for a credit card
+      description: Retrieves a list of the 10 most recent transactions for a given the last 4 digits of the account number.
+      operationId: getRecentTransactions
+      parameters:
+        - in: path
+          name: accountNumber
+          schema:
+            type: string
+          required: true
+          description: Credit card account number
+      responses:
+        '200':
+          description: List of recent transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+        '404':
+          description: Account not found
+  /status/{accountNumber}:
+    get:
+      summary: Get credit card status
+      description: Retrieves the status of a given credit card account, including any decline reasons the last 4 digits of the account number.
+      operationId: getAccountStatus
+      parameters:
+        - in: path
+          name: accountNumber
+          schema:
+            type: string
+          required: true
+          description: Credit card account number
+      responses:
+        '200':
+          description: Credit card status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  decline_reason:
+                    type: string
+                    nullable: true
+        '404':
+          description: Account not found
+components:
+  schemas:
+    CreditCard:
+      type: object
+      properties:
+        account_number:
+          type: string
+        credit_limit:
+          type: number
+          format: float
+        balance:
+          type: number
+          format: float
+        last_payment_date:
+          type: string
+          format: date-time
+        status:
+          type: string
+        decline_reason:
+          type: string
+          nullable: true
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+        account_number:
+          type: string
+        amount:
+          type: number
+          format: float
+        date:
+          type: string
+          format: date-time
+        description:
+          type: string
